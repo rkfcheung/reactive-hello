@@ -1,0 +1,4 @@
+playground:
+  serviceUrl: https://httpbin.org
+  login: guest
+  password: guest
