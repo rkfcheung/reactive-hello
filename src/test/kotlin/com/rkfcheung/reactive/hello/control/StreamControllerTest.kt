@@ -1,10 +1,18 @@
 package com.rkfcheung.reactive.hello.control
 
 import com.rkfcheung.reactive.hello.AbstractTest
+import com.rkfcheung.reactive.hello.model.StreamResult
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.Assertions.*
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.codec.cbor.Jackson2CborDecoder
+import org.springframework.http.codec.cbor.Jackson2CborEncoder
+import org.springframework.messaging.rsocket.RSocketRequester
+import org.springframework.messaging.rsocket.RSocketStrategies
+import org.springframework.messaging.rsocket.retrieveFlow
 import reactor.test.StepVerifier
 
 internal class StreamControllerTest : AbstractTest() {
@@ -14,17 +22,31 @@ internal class StreamControllerTest : AbstractTest() {
 
     @Test
     fun testStream() = runBlocking {
-        val result = streamController.stream(8).take(2)
-        val ts = StepVerifier.create(result)
-                .expectNextMatches {
-                    assertEquals(0, it.id)
-                    it.id == 0
-                }
-                .expectNextMatches {
-                    log.info(it.toString())
-                    it.id == 1
-                }
-                .verifyComplete()
-        log.info("Duration : $ts")
+        var i = 0
+        val size = 8
+        streamController.stream(size).collect {
+            log.info("Result: $it")
+            i++
+        }
+        assertEquals(size, i)
+    }
+
+    @Test
+    fun testRSocketRequester() = runBlocking {
+        var i = 0
+        val size = 2
+        val strategies = RSocketStrategies.builder()
+                .encoders { it.add(Jackson2CborEncoder()) }
+                .decoders { it.add(Jackson2CborDecoder()) }
+                .build()
+        val requester = RSocketRequester.builder()
+                .rsocketStrategies(strategies)
+                .connectTcp("localhost", 7000)
+                .block()
+        requester?.route("stream")?.data(size)?.retrieveFlow<StreamResult>()?.collect {
+            log.info("Result: $it")
+            i++
+        }
+        assertEquals(size, i)
     }
 }

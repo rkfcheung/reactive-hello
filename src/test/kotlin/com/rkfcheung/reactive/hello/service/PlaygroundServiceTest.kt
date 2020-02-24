@@ -4,6 +4,7 @@ import com.rkfcheung.reactive.hello.AbstractTest
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.messaging.rsocket.RSocketRequester
 import reactor.test.StepVerifier
 
 internal class PlaygroundServiceTest : AbstractTest() {
