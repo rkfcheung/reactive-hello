@@ -5,48 +5,46 @@ import com.rkfcheung.reactive.hello.config.PlaygroundAuth
 import com.rkfcheung.reactive.hello.config.PlaygroundProperties
 import com.rkfcheung.reactive.hello.model.ConfigConstants
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.boot.test.context.SpringBootTest
 
-@SpringBootTest
-class HelloApplicationTests {
+class HelloApplicationTests : AbstractTest() {
 
-	@Autowired
-	private lateinit var properties: PlaygroundProperties
+    @Autowired
+    private lateinit var properties: PlaygroundProperties
 
-	@Autowired
-	private lateinit var adminAuth: PlaygroundAuth
+    @Autowired
+    private lateinit var adminAuth: PlaygroundAuth
 
-	@Autowired
-	@Qualifier(ConfigConstants.USER_AUTH)
-	private lateinit var userAuth: Auth
+    @Autowired
+    @Qualifier(ConfigConstants.USER_AUTH)
+    private lateinit var userAuth: Auth
 
-	@Autowired
-	private lateinit var guestAuth: Auth
+    @Autowired
+    private lateinit var guestAuth: Auth
 
-	@Value("\${playground.serviceUrl}")
-	private lateinit var serviceUrl: String
+    @Value("\${playground.serviceUrl}")
+    private lateinit var serviceUrl: String
 
-	@Value("\${playground.admin.login}")
-	private lateinit var adminLogin: String
+    @Value("\${playground.admin.login}")
+    private lateinit var adminLogin: String
 
-	@Value("\${playground.guest.login}")
-	private lateinit var guestLogin: String
+    @Value("\${playground.guest.login}")
+    private lateinit var guestLogin: String
 
-	@Test
-	fun contextLoads() {
-	}
+    @Test
+    fun contextLoads() {
+        log.info("Hello World!")
+    }
 
-	@Test
-	fun testLoadProperties() {
-		assertEquals(serviceUrl, properties.serviceUrl)
-		assertEquals(PlaygroundAuth(userAuth), properties.auth)
-		assertEquals(adminLogin, adminAuth.login)
-		assertEquals(guestLogin, guestAuth.login)
-	}
+    @Test
+    fun testLoadProperties() {
+        assertEquals(serviceUrl, properties.serviceUrl)
+        assertEquals(PlaygroundAuth(userAuth), properties.auth)
+        assertEquals(adminLogin, adminAuth.login)
+        assertEquals(guestLogin, guestAuth.login)
+    }
 
 }

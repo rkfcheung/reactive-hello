@@ -1,22 +1,23 @@
-package com.rkfcheung.reactive.hello.service
+package com.rkfcheung.reactive.hello.control
 
 import com.rkfcheung.reactive.hello.AbstractTest
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.Assertions.*
 import org.springframework.beans.factory.annotation.Autowired
 import reactor.test.StepVerifier
 
-internal class PlaygroundServiceTest : AbstractTest() {
+internal class StreamControllerTest : AbstractTest() {
 
     @Autowired
-    private lateinit var playgroundService: PlaygroundService
+    private lateinit var streamController: StreamController
 
     @Test
     fun testStream() = runBlocking {
-        val result = playgroundService.stream(16).take(2)
+        val result = streamController.stream(8).take(2)
         val ts = StepVerifier.create(result)
                 .expectNextMatches {
-                    log.info(it.toString())
+                    assertEquals(0, it.id)
                     it.id == 0
                 }
                 .expectNextMatches {

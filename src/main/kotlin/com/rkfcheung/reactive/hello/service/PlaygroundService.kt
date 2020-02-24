@@ -1,7 +1,7 @@
 package com.rkfcheung.reactive.hello.service
 
 import com.rkfcheung.reactive.hello.model.ConfigConstants
-import com.rkfcheung.reactive.hello.model.Result
+import com.rkfcheung.reactive.hello.model.StreamResult
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
@@ -17,6 +17,6 @@ class PlaygroundService {
     suspend fun stream(n: Int) = client.get()
             .uri("${ConfigConstants.PATH_STREAM}/{n}", n)
             .awaitExchange()
-            .bodyToFlux(Result::class.java)
+            .bodyToFlux(StreamResult::class.java)
 
 }

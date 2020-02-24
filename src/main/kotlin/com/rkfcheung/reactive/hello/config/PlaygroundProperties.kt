@@ -8,8 +8,8 @@ import org.springframework.stereotype.Component
 @ConfigurationProperties("playground")
 data class PlaygroundProperties(var serviceUrl: String, var auth: PlaygroundAuth)
 
-data class PlaygroundAuth(override var login: String, override var password: String): Auth() {
-    constructor(auth: Auth): this(auth.login, auth.password)
+data class PlaygroundAuth(override var login: String, override var password: String) : Auth() {
+    constructor(auth: Auth) : this(auth.login, auth.password)
 }
 
 @Component
