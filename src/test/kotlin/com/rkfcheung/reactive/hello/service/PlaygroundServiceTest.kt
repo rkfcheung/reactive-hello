@@ -1,6 +1,7 @@
 package com.rkfcheung.reactive.hello.service
 
 import com.rkfcheung.reactive.hello.AbstractTest
+import kotlinx.coroutines.reactor.asFlux
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -14,7 +15,7 @@ internal class PlaygroundServiceTest : AbstractTest() {
 
     @Test
     fun testStream() = runBlocking {
-        val result = playgroundService.stream(16).take(2)
+        val result = playgroundService.stream(16).asFlux().take(2)
         val ts = StepVerifier.create(result)
                 .expectNextMatches {
                     log.info(it.toString())

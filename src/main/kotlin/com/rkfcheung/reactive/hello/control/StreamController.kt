@@ -19,6 +19,6 @@ class StreamController {
     @MessageMapping("stream")
     suspend fun stream(n: Int): Flow<StreamResult> {
         log.info("stream($n)")
-        return service.stream(n).asFlow()
+        return service.stream(n)
     }
 }

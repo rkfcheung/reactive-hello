@@ -5,5 +5,6 @@ object ConfigConstants {
     const val ADMIN_AUTH = "AdminAuth"
     const val USER_AUTH = "UserAuth"
     const val GUEST_AUTH = "GuestAuth"
+    const val PATH_GET = "/get"
     const val PATH_STREAM = "/stream"
 }
