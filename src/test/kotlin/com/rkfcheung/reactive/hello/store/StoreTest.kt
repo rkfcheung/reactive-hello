@@ -9,6 +9,7 @@ import com.rkfcheung.reactive.hello.model.StreamResult
 import com.rkfcheung.reactive.hello.service.PlaygroundService
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
+import org.json.JSONObject
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -23,13 +24,20 @@ internal class StoreTest : AbstractTest() {
 
     @Test
     fun testBuildStore() = runBlocking {
-        val store = StoreBuilder.fromNonFlow<Int, Map<String, Any>> { keyId ->
-            playgroundService.get(keyId)
+        val store = StoreBuilder.fromNonFlow<Int, JSONObject> { keyId ->
+            JSONObject(playgroundService.get(keyId))
         }.build()
+
         (1..8).forEach { i ->
-            val response = store.get(i)
-            log.info(response.toString())
-            assertTrue(response["url"]?.toString()?.contains("key=$i") == true)
+            val json = store.get(i)
+            log.info(json.toString())
+            assertTrue(json.get("url").toString().contains("key=$i"))
+
+            withTimeoutOrNull(1_000) {
+                store.stream(StoreRequest.cached(i, true)).collect { response ->
+                    log.info(response.toString())
+                }
+            }
         }
     }
 
@@ -37,18 +45,22 @@ internal class StoreTest : AbstractTest() {
     @Test
     fun testBuildStoreFromFlow() = runBlocking(Dispatchers.Default) {
         val store = StoreBuilder.from<Int, StreamResult> {
-            runBlocking {
-                playgroundService.stream(it)
-            }
+            streamAsFlow(it)
         }.build()
-        withTimeoutOrNull(5_000) {
-            store.stream(StoreRequest.fresh(2)).collect { response ->
-                when (response) {
-                    is StoreResponse.Data -> log.info(response.value.toString())
-                    else -> log.info(response.toString())
+
+        (1..8).forEach { i ->
+            withTimeoutOrNull(1_000) {
+                store.stream(StoreRequest.fresh(i)).collect { response ->
+                    when (response) {
+                        is StoreResponse.Data -> log.info(response.value.toString())
+                        else -> log.info(response.toString())
+                    }
                 }
             }
         }
-        assertTrue(true)
+    }
+
+    private fun streamAsFlow(n: Int) = runBlocking {
+        playgroundService.stream(n)
     }
 }
