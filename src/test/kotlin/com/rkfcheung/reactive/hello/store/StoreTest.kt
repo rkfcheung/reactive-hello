@@ -9,18 +9,18 @@ import com.rkfcheung.reactive.hello.model.StreamResult
 import com.rkfcheung.reactive.hello.service.PlaygroundService
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.take
 import org.json.JSONObject
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
-
 @ExperimentalCoroutinesApi
 @FlowPreview
+@InternalCoroutinesApi
 internal class StoreTest : AbstractTest() {
     @Autowired
     private lateinit var playgroundService: PlaygroundService
-
 
     @Test
     fun testBuildStore() = runBlocking {
@@ -34,14 +34,13 @@ internal class StoreTest : AbstractTest() {
             assertTrue(json.get("url").toString().contains("key=$i"))
 
             withTimeoutOrNull(1_000) {
-                store.stream(StoreRequest.cached(i, true)).collect { response ->
+                store.stream(StoreRequest.cached(i, true)).take(i).collect { response ->
                     log.info(response.toString())
                 }
             }
         }
     }
 
-    @InternalCoroutinesApi
     @Test
     fun testBuildStoreFromFlow() = runBlocking(Dispatchers.Default) {
         val store = StoreBuilder.from<Int, StreamResult> {
