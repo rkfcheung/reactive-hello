@@ -61,8 +61,8 @@ internal class SimplePersisterTest : AbstractTest() {
     }
 
     @Test
-    fun testGetFreshClearKeys() = runBlocking(testScope.coroutineContext) {
-        val store = prepareStore(2)
+    fun testGetFreshClearKeys() = testScope.runBlockingTest {
+        val store = prepareStore(2L)
         val a = store.get("a")
         val b = store.get("b")
         val c = store.get("c")

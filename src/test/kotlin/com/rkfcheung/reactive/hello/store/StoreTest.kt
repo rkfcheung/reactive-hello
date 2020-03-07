@@ -1,15 +1,12 @@
 package com.rkfcheung.reactive.hello.store
 
-import com.dropbox.android.external.store4.StoreBuilder
-import com.dropbox.android.external.store4.StoreRequest
-import com.dropbox.android.external.store4.StoreResponse
-import com.dropbox.android.external.store4.get
+import com.dropbox.android.external.store4.*
 import com.rkfcheung.reactive.hello.AbstractTest
 import com.rkfcheung.reactive.hello.model.StreamResult
 import com.rkfcheung.reactive.hello.service.PlaygroundService
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.take
+import kotlinx.coroutines.flow.filterNot
 import org.json.JSONObject
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -26,7 +23,7 @@ internal class StoreTest : AbstractTest() {
     fun testBuildStore() = runBlocking(testScope.coroutineContext) {
         val store = StoreBuilder.fromNonFlow<Int, JSONObject> { keyId ->
             JSONObject(playgroundService.get(keyId))
-        }.build()
+        }.scope(testScope).build()
 
         val jobs = mutableListOf<Job>()
         (1..8).forEach { i ->
@@ -35,8 +32,9 @@ internal class StoreTest : AbstractTest() {
             assertTrue(json.get("url").toString().contains("key=$i"))
 
             jobs += launch {
-                store.stream(StoreRequest.cached(i, true)).take(i).collect { response ->
+                store.stream(StoreRequest.cached(i, true)).filterNot { it.origin == ResponseOrigin.Fetcher }.collect { response ->
                     log.info(response.toString())
+                    assertTrue(response.requireData().get("url").toString().contains("key=$i"))
                 }
             }
         }
@@ -44,13 +42,14 @@ internal class StoreTest : AbstractTest() {
     }
 
     @Test
-    fun testBuildStoreFromFlow() = runBlocking(Dispatchers.Default) {
+    fun testBuildStoreFromFlow() = runBlocking(testScope.coroutineContext) {
         val store = StoreBuilder.from<Int, StreamResult> {
             streamAsFlow(it)
-        }.build()
+        }.scope(testScope).build()
 
+        val jobs = mutableListOf<Job>()
         (1..8).forEach { i ->
-            withTimeoutOrNull(1_000) {
+            jobs += launch {
                 store.stream(StoreRequest.fresh(i)).collect { response ->
                     when (response) {
                         is StoreResponse.Data -> log.info(response.value.toString())
@@ -59,9 +58,10 @@ internal class StoreTest : AbstractTest() {
                 }
             }
         }
+        jobs.forEach { it.cancelAndJoin() }
     }
 
-    private fun streamAsFlow(n: Int) = runBlocking {
+    private fun streamAsFlow(n: Int) = runBlocking(testScope.coroutineContext) {
         playgroundService.stream(n)
     }
 }
