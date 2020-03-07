@@ -23,22 +23,24 @@ internal class StoreTest : AbstractTest() {
     private lateinit var playgroundService: PlaygroundService
 
     @Test
-    fun testBuildStore() = runBlocking {
+    fun testBuildStore() = runBlocking(testScope.coroutineContext) {
         val store = StoreBuilder.fromNonFlow<Int, JSONObject> { keyId ->
             JSONObject(playgroundService.get(keyId))
         }.build()
 
+        val jobs = mutableListOf<Job>()
         (1..8).forEach { i ->
             val json = store.get(i)
             log.info(json.toString())
             assertTrue(json.get("url").toString().contains("key=$i"))
 
-            withTimeoutOrNull(1_000) {
+            jobs += launch {
                 store.stream(StoreRequest.cached(i, true)).take(i).collect { response ->
                     log.info(response.toString())
                 }
             }
         }
+        jobs.forEach { it.cancelAndJoin() }
     }
 
     @Test

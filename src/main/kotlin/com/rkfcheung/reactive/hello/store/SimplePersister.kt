@@ -31,4 +31,8 @@ class SimplePersister<Key, Output> {
         data.clear()
         log.info("[_all] deleteAll")
     }
+
+    override fun toString(): String {
+        return "SimplePersister(data=$data)"
+    }
 }

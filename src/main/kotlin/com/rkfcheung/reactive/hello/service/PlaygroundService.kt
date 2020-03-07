@@ -5,6 +5,7 @@ import com.rkfcheung.reactive.hello.model.StreamResult
 import kotlinx.coroutines.reactive.asFlow
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.awaitBodyOrNull
@@ -18,6 +19,7 @@ class PlaygroundService {
 
     suspend fun stream(n: Int) = client.get()
             .uri("${ConfigConstants.PATH_STREAM}/{n}", n)
+            .accept(MediaType.ALL)
             .awaitExchange()
             .bodyToFlux(StreamResult::class.java)
             .asFlow()

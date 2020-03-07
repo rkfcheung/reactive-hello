@@ -28,6 +28,7 @@ dependencies {
 		exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
 	}
 	testImplementation("io.projectreactor:reactor-test")
+	implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test")
 }
 
 tasks.withType<Test> {

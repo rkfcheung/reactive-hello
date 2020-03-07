@@ -1,11 +1,11 @@
 package com.rkfcheung.reactive.hello.store
 
-import com.dropbox.android.external.store4.MemoryPolicy
-import com.dropbox.android.external.store4.StoreBuilder
-import com.dropbox.android.external.store4.fresh
-import com.dropbox.android.external.store4.get
+import com.dropbox.android.external.store4.*
 import com.rkfcheung.reactive.hello.AbstractTest
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.test.TestCoroutineScope
+import kotlinx.coroutines.test.runBlockingTest
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.util.*
@@ -14,14 +14,15 @@ import java.util.concurrent.TimeUnit
 @ExperimentalCoroutinesApi
 @FlowPreview
 internal class SimplePersisterTest : AbstractTest() {
+    @ExperimentalCoroutinesApi
     private val persister = SimplePersister<String, UUID>()
 
     @Test
-    fun testUsePersister() = runBlocking {
+    fun testUsePersister() = testScope.runBlockingTest {
         val size = 8
         val store = StoreBuilder.fromNonFlow<String, UUID> { key ->
             get(key)
-        }.cachePolicy(
+        }.scope(testScope).cachePolicy(
                 MemoryPolicy.builder()
                         .setMemorySize(size.toLong())
                         .setExpireAfterAccess(20)
@@ -41,7 +42,8 @@ internal class SimplePersisterTest : AbstractTest() {
         assertNotEquals(result, store.fresh(key))
 
         val data = mutableMapOf<String, UUID>()
-        repeat(size * 2) { i ->
+        val times = size * 2
+        repeat(times) { i ->
             val k = i.toString()
             data[k] = store.get(k)
 
@@ -58,7 +60,18 @@ internal class SimplePersisterTest : AbstractTest() {
                 assertEquals(v, u)
         }
 
-        assertTrue(true)
+        log.info(persister.toString())
+        for (i in 0 until times) {
+            assertNotNull(persister.read(i.toString()))
+        }
+
+        val job = launch {
+            store.stream(StoreRequest.cached(key, false)).collect {
+                log.info(it.toString())
+                assertEquals(persister.read(key), it.requireData())
+            }
+        }
+        job.cancelAndJoin()
     }
 
     private fun get(key: String) = UUID.randomUUID().also {
