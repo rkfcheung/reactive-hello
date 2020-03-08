@@ -5,4 +5,5 @@ Reactive Hello World in Spring Boot/Kotlin
 * [Kotlin Asychronous Flow](https://kotlinlang.org/docs/reference/coroutines/flow.html)
 * [Project Reactor](https://projectreactor.io/)
 * [Dropbox Stote](https://github.com/dropbox/Store)
+* [Spring Kotlin Coroutine](https://github.com/konrad-kaminski/spring-kotlin-coroutine)
 * [HttpBin](https://httpbin.org/)
