@@ -13,11 +13,14 @@ java.sourceCompatibility = JavaVersion.VERSION_11
 
 repositories {
 	mavenCentral()
+	jcenter()
 }
 
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-rsocket")
 	implementation("org.springframework.boot:spring-boot-starter-webflux")
+	implementation("org.springframework.kotlin:spring-kotlin-coroutine:0.3.7")
+	//implementation("org.springframework.kotlin:spring-webflux-kotlin-coroutine:0.3.7")
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")

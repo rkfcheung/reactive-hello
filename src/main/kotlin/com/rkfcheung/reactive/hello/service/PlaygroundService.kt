@@ -3,6 +3,7 @@ package com.rkfcheung.reactive.hello.service
 import com.rkfcheung.reactive.hello.model.ConfigConstants
 import com.rkfcheung.reactive.hello.model.StreamResult
 import kotlinx.coroutines.reactive.asFlow
+import org.json.JSONObject
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.MediaType
@@ -27,5 +28,5 @@ class PlaygroundService {
     suspend fun get(keyId: Int) = client.get()
             .uri("${ConfigConstants.PATH_GET}?key=$keyId", keyId)
             .awaitExchange()
-            .awaitBodyOrNull<Map<String, Any>>() ?: emptyMap()
+            .awaitBodyOrNull<String>()?.let { JSONObject(it) } ?: JSONObject()
 }

@@ -5,7 +5,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 // https://github.com/dropbox/Store/blob/master/store/src/test/java/com/dropbox/android/external/store4/testutil/InMemoryPersister.kt
-class SimplePersister<Key, Value> : Persister<Value, Key> {
+class SimplePersister<Key, Value> : Persister<Value, Key>, DiskDelete<Key> {
     private val log: Logger = LoggerFactory.getLogger(this.javaClass)
     private val data = mutableMapOf<Key, Value>()
 
@@ -20,14 +20,12 @@ class SimplePersister<Key, Value> : Persister<Value, Key> {
         return true
     }
 
-    @Suppress("RedundantSuspendModifier") // for function reference
-    suspend fun delete(key: Key) {
+    override suspend fun delete(key: Key) {
         val value = data.remove(key)
         log.info("[$key] remove: $value")
     }
 
-    @Suppress("RedundantSuspendModifier") // for function reference
-    suspend fun deleteAll() {
+    override suspend fun deleteAll() {
         data.clear()
         log.info("[_all] deleteAll")
     }
