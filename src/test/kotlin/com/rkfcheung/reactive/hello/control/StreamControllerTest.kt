@@ -14,7 +14,6 @@ import org.springframework.messaging.rsocket.RSocketStrategies
 import org.springframework.messaging.rsocket.retrieveFlow
 
 internal class StreamControllerTest : AbstractTest() {
-
     @Autowired
     private lateinit var streamController: StreamController
 
@@ -42,7 +41,7 @@ internal class StreamControllerTest : AbstractTest() {
                 .connectTcp("localhost", 7000)
                 .block()
         requester?.route("stream")?.data(size)?.retrieveFlow<StreamResult>()?.collect {
-        log.info("Result: $it")
+            log.info("Result: $it")
             i++
         }
         assertEquals(size, i)
